@@ -32,14 +32,19 @@
         <section>
           <section data-markdown>
             <textarea data-template>
-							## Promiseとは
-							非同期プログラミングの一種
-							コールバックパターンの次に出てきた(ES2015)
-							エラーハンドリングをまとめてやりたい
+							## Promise
 							---
-							コールバックパターン
+							### 約束
+							---
+							- あとで値を返す約束
+							---
+							- 非同期プログラミング
+							---
+							### コールバックパターン
+							- 最も基本的な非同期プログラミング
 							---
 							```js[]
+							// 1秒後にメッセージを表示
 							setTimeout(
 								() => console.log("1秒経過しました"),
 								1000
@@ -47,6 +52,7 @@
 							```
 							---
 							```js[]
+							// 指定したディレクトリのファイル一覧を表示
 							fs.readdir(
 								"./",
 								(err, files) => {
@@ -59,9 +65,21 @@
 							)
 							```
 							---
-							### 複数の処理を順番に実行
-							- ネスト地獄
-							- エラーハンドリングが重複
+							コールバックパターンの規約
+							```js[]
+							fs.readdir(
+								"./",
+								(err, files) => {
+									// 省略
+								}
+							)
+							```
+							- コールバックが引数の最後
+							- コールバックの最初の引数はエラー
+							--- 
+							setTimeoutはブラウザのAPI由来なので規約に従わない
+							---
+							### 複数の処理を順番に実行すると
 							```js[]
 							asyncFunc1(input, (err, result) => {
 								if (err) {
@@ -97,7 +115,19 @@
         <section>
           <section data-markdown>
             <textarea data-template>
-							## Promiseインスタンス
+							## Promiseの使い方
+							---
+							### Promiseコンストラクタ
+							```js[]
+							new Promise((resolve, reject) => {
+								// resolve()
+								// reject() または throw new Error()
+							});
+							```
+							---
+							### Promiseインスタンスの状態
+							- `pending` → `settled`
+							- settled = `fulfilled` or `rejected`
 							---
 							### Promiseインスタンスを返す関数
 							```js[]
@@ -141,17 +171,10 @@
 							---
 							### Promiseインスタンスの状態
 							```js[]
-							new Promise((resolve, reject) => {
-								// resolve()
-								// reject() または throw new Error()
-							});
+							// 関数呼び出し後: Promise { <pending> }
+							// 1秒後: Promise { { foo: 1 } }
+							// 1秒後: Promise { <rejected> [SyntaxError: Unexpected token 不, "不正なJSON" is not valid JSON] }
 							```
-							- 最初は`<pending>`
-							- resolve()すると`<fulfilled>`
-							- reject()またはエラーをthrowすると`<rejected>`
-
-
-							
 						</textarea
             >
           </section>
@@ -159,7 +182,7 @@
         <section>
           <section data-markdown>
             <textarea data-template>
-							## then(), catch(), finally()
+							## 解決されたPromiseのハンドリング
 							---
 							### then()
 							非同期処理の結果をハンドリング
@@ -175,7 +198,6 @@
 								}
 							)
 							```
-
 							- どちらのコールバックも省略可能
 							- then()もまたPromiseインスタンスを返す
 							---
@@ -203,8 +225,20 @@
 								});
 							```
 							エラーハンドリングを一箇所に集約できる
-
-
+						</textarea
+            >
+          </section>
+        </section>
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+							## まとめ
+							---
+							- コールバックパターンはネストやエラーハンドリングがごちゃつく
+							---
+							- Promiseは解決/未解決の状態を持つインスタンスを返す
+							---
+							- then()やcatch()メソッドで非同期処理の結果をハンドリング
 						</textarea
             >
           </section>
