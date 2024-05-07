@@ -1,40 +1,231 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
 
-		<title>reveal.js</title>
+    <title>reveal.js</title>
 
-		<link rel="stylesheet" href="dist/reset.css">
-		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" />
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+    <style type="text/css">
+      .reveal h1,
+      .reveal h2,
+      .reveal h3,
+      .reveal h4,
+      .reveal h5,
+      .reveal h6 {
+        text-transform: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+							## Promiseとは
+							非同期プログラミングの一種
+							コールバックパターンの次に出てきた(ES2015)
+							エラーハンドリングをまとめてやりたい
+							---
+							コールバックパターン
+							---
+							```js[]
+							setTimeout(
+								() => console.log("1秒経過しました"),
+								1000
+							)
+							```
+							---
+							```js[]
+							fs.readdir(
+								"./",
+								(err, files) => {
+									if (err) {
+										console.error(err)
+										return
+									}
+									console.log(files)
+								}
+							)
+							```
+							---
+							### 複数の処理を順番に実行
+							- ネスト地獄
+							- エラーハンドリングが重複
+							```js[]
+							asyncFunc1(input, (err, result) => {
+								if (err) {
+									// エラーハンドリング
+								}
+								asyncFunc2(result, (err, result) => {
+									if (err) {
+										// エラーハンドリング
+									}
+									asyncFunc3(result, (err, result) => {
+										if (err) {
+											// エラーハンドリング
+										}
+									})
+								})
+							})
+							```
+							---
+							### Promise
+							```js[]
+							asyncFunc1(input)
+								.then(result => asyncFunc2(result))
+								.then(result => asyncFunc3(result))
+								.catch(err => {
+									// エラーハンドリング
+								})
+							```
+							
+						</textarea
+            >
+          </section>
+        </section>
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+							## Promiseインスタンス
+							---
+							### Promiseインスタンスを返す関数
+							```js[]
+							function parseJSONAsync(json) {
+								return new Promise((resolve, reject) => {
+									setTimeout(() => {
+										try {
+											resolve(JSON.parse(json));
+										} catch (e) {
+											reject(e);
+										}
+									}, 1000);
+								});
+							}
+							```
+							---
+							### 1秒後にJSONをパース
+							```js[]
+							const toBeFulfilled = parseJSONAsync('{"foo": 1}');
 
-		<script src="dist/reveal.js"></script>
-		<script src="plugin/notes/notes.js"></script>
-		<script src="plugin/markdown/markdown.js"></script>
-		<script src="plugin/highlight/highlight.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				hash: true,
+							console.log("関数呼び出し後: ", toBeFulfilled);
+							// 関数呼び出し後: Promise { <pending> }
+							
+							setTimeout(() => {
+								console.log("1秒後: ", toBeFulfilled);
+							}, 1000);
+							// 1秒後: Promise { { foo: 1 } }
+							```
+							---
+							```js[]
+							const toBeRejected = parseJSONAsync('不正なJSON');
 
-				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
-			});
-		</script>
-	</body>
+							console.log("関数呼び出し後: ", toBeRejected);
+							// 関数呼び出し後: Promise { <pending> }
+
+							setTimeout(() => {
+								console.log("1秒後: ", toBeRejected);
+							}, 1000);
+							// 1秒後: Promise { <rejected> [SyntaxError: Unexpected token 不, "不正なJSON" is not valid JSON] }
+							```
+							---
+							### Promiseインスタンスの状態
+							```js[]
+							new Promise((resolve, reject) => {
+								// resolve()
+								// reject() または throw new Error()
+							});
+							```
+							- 最初は`<pending>`
+							- resolve()すると`<fulfilled>`
+							- reject()またはエラーをthrowすると`<rejected>`
+
+
+							
+						</textarea
+            >
+          </section>
+        </section>
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+							## then(), catch(), finally()
+							---
+							### then()
+							非同期処理の結果をハンドリング
+							```js[]
+							promise.then(
+								// onFulfilled
+								value => {
+									// 成功時の処理
+								},
+								// onRejected
+								err => {
+									// 失敗時の処理	
+								}
+							)
+							```
+
+							- どちらのコールバックも省略可能
+							- then()もまたPromiseインスタンスを返す
+							---
+							```js[]
+							parseJSONAsync('{"foo": 1}').then(
+								value => {
+									console.log("onFulfilled", value);
+								},
+								err => {
+									console.error("onRejected", err);
+								}
+							)
+
+							// onFulfilled { foo: 1 }
+							```
+							---
+							### catch()
+							```js[]
+							promise
+								.then((value) => {
+									// 成功時の処理
+								})
+								.catch((err) => {
+									// 失敗時の処理
+								});
+							```
+							エラーハンドリングを一箇所に集約できる
+
+
+						</textarea
+            >
+          </section>
+        </section>
+      </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+        hash: true,
+
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+      });
+    </script>
+  </body>
 </html>

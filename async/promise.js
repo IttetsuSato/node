@@ -21,3 +21,14 @@ setTimeout(() => {
   console.log(toBeFulfilled);
   console.log(toBeRejected);
 }, 1000);
+
+const asyncFunction = () =>
+  new Promise((resolve, reject) => {
+    //
+  });
+
+function promiseFunction() {
+  return new Promise((resolve, reject) => {
+    resolve(1);
+  });
+}
