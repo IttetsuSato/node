@@ -29,28 +29,41 @@
   <body>
     <div class="reveal">
       <div class="slides">
+		<section>
+			<section data-markdown>
+			  <textarea data-template>
+				## 非同期プログラミング全体像
+				---
+				1. コールバックパターン
+				2. Promise
+				3. async/await
+				---
+				そもそもJavaScriptはシングルスレッド<br>
+				→ 同時に実行できる処理は1つ
+				---
+				データの取得やファイル読み込みなど<br>
+				時間のかかる作業は非同期処理で行う
+				---
+				非同期プログラミング<br>
+				並行処理を制御する仕組み
+						  </textarea
+			  >
+			</section>
+		  </section>
         <section>
           <section data-markdown>
             <textarea data-template>
-							## Promise
-							---
-							### 約束
-							---
-							- あとで値を返す約束
-							---
-							- 非同期プログラミング
-							---
 							### コールバックパターン
 							- 最も基本的な非同期プログラミング
 							---
+							### 文法
 							```js[]
-							// 1秒後にメッセージを表示
-							setTimeout(
-								() => console.log("1秒経過しました"),
-								1000
-							)
+							asyncFunc(args, (error, result) => {
+								// errorやresultを使った処理
+							})
 							```
 							---
+							### 例
 							```js[]
 							// 指定したディレクトリのファイル一覧を表示
 							fs.readdir(
@@ -76,6 +89,15 @@
 							```
 							- コールバックが引数の最後
 							- コールバックの最初の引数はエラー
+							---
+							### 例外
+							```js[]
+							// 1秒後にメッセージを表示
+							setTimeout(
+								() => console.log("1秒経過しました"),
+								1000
+							)
+							```
 							---
 							setTimeoutはブラウザのAPI由来なので規約に従わない
 							---
@@ -107,7 +129,6 @@
 									// エラーハンドリング
 								})
 							```
-							
 						</textarea
             >
           </section>
@@ -115,9 +136,9 @@
         <section>
           <section data-markdown>
             <textarea data-template>
-							## Promiseの使い方
+							## Promise
 							---
-							### Promiseコンストラクタ
+							### 文法
 							```js[]
 							new Promise((resolve, reject) => {
 								// resolve()
@@ -126,10 +147,11 @@
 							```
 							---
 							### Promiseインスタンスの状態
-							- `pending` → `settled`
-							- settled = `fulfilled` or `rejected`
+							- `pending`(未確定) → `settled`(確定)
+							- settled = `fulfilled`(成功) or `rejected`(失敗)
 							---
-							### Promiseインスタンスを返す関数
+							### 例
+							* 1秒後にJSONをパース
 							```js[]
 							function parseJSONAsync(json) {
 								return new Promise((resolve, reject) => {
@@ -144,27 +166,28 @@
 							}
 							```
 							---
-							### 1秒後にJSONをパース
+							### 1秒後にJSONをパース成功
 							```js[]
-							const toBeFulfilled = parseJSONAsync('{"foo": 1}');
+							const result = parseJSONAsync('{"foo": 1}');
 
-							console.log("関数呼び出し後: ", toBeFulfilled);
+							console.log("関数呼び出し後: ", result);
 							// 関数呼び出し後: Promise { <pending> }
 							
 							setTimeout(() => {
-								console.log("1秒後: ", toBeFulfilled);
+								console.log("1秒後: ", result);
 							}, 1000);
 							// 1秒後: Promise { { foo: 1 } }
 							```
 							---
+							### 1秒後にJSONをパース失敗
 							```js[]
-							const toBeRejected = parseJSONAsync('不正なJSON');
+							const result = parseJSONAsync('不正なJSON');
 
-							console.log("関数呼び出し後: ", toBeRejected);
+							console.log("関数呼び出し後: ", result);
 							// 関数呼び出し後: Promise { <pending> }
 
 							setTimeout(() => {
-								console.log("1秒後: ", toBeRejected);
+								console.log("1秒後: ", result);
 							}, 1000);
 							// 1秒後: Promise { <rejected> [SyntaxError: Unexpected token 不, "不正なJSON" is not valid JSON] }
 							```
@@ -243,9 +266,27 @@
 								.finally(() => // 成功・失敗に関わらず最後に実行)
 							```
 							---
+							### Promise.all()
+							- 複数の非同期処理を並行実行
+							```js[]
+							Promise.all([
+								asyncFunc1(input),
+								asyncFunc2(input),
+								asyncFunc3(input)
+							]).then(([result1, result2, result3]) => {
+								// 3つの非同期処理が完了した後の処理
+							}).catch(err => ...);
+							```
+							---
+							### 非同期処理を並行実行するメソッド
+							- Promise.all()
+							- Promise.race()
+							- Promise.allSettled()
+							- Promise.any()
+							---
 							### Promiseまとめ
 							- 複数の非同期処理をまとめて扱うメソッドを提供
-							- 非同期処理の状態・結果をオブジェクトとして扱う
+							- 非同期処理の状態・結果を扱いやすい
 						</textarea
             >
           </section>
@@ -255,7 +296,8 @@
             <textarea data-template>
 							## async/await
 							---
-							### async関数
+							### 文法
+							- async関数の中でPromise関数に対してawaitを使う
 							```js[]
 							async function asyncFunc(input) {
 								try {
@@ -272,7 +314,11 @@
 							### async/awaitのメリット
 							- then()やcatch()を使わずに非同期処理を同期処理のように書ける
 							- スコープが過剰に分割されない
-
+							---
+							### 非同期プログラミング全体像
+							1. コールバックパターン
+							2. Promise
+							3. async/await
 						</textarea
             >
           </section>
